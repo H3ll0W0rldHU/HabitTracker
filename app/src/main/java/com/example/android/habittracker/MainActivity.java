@@ -3,8 +3,8 @@ package com.example.android.habittracker;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         db.insert(HabitEntry.TABLE_NAME, null, values);
     }
 
-    private void displayDatabaseInfo() {
+    private Cursor readData() {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         String[] projection = {
                 HabitEntry._ID,
@@ -47,33 +47,39 @@ public class MainActivity extends AppCompatActivity {
         };
 
         Cursor cursor = db.query(HabitEntry.TABLE_NAME, projection, null, null, null, null, null);
+        return cursor;
+    }
+
+    private void displayDatabaseInfo() {
+
         TextView displayView = (TextView) findViewById(R.id.habit_db_view);
+        Cursor c = readData();
 
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // habits table in the database).
-            displayView.setText("The habits table contains " + cursor.getCount() + " rows.\n\n");
+            displayView.setText("The habits table contains " + readData().getCount() + " rows.\n\n");
             displayView.append(HabitEntry._ID + " - " + HabitEntry.COLUMN_HABIT_NAME + " - " + HabitEntry.COLUMN_DATE + " - " + HabitEntry.COLUMN_START_TIME + " - " + HabitEntry.COLUMN_FINISH_TIME + "\n");
 
-            int idColumnIndex = cursor.getColumnIndex(HabitEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_HABIT_NAME);
-            int dateColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_DATE);
-            int starttimeColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_START_TIME);
-            int finishtimeColumnIndex = cursor.getColumnIndex(HabitEntry.COLUMN_FINISH_TIME);
+            int idColumnIndex = c.getColumnIndex(HabitEntry._ID);
+            int nameColumnIndex = c.getColumnIndex(HabitEntry.COLUMN_HABIT_NAME);
+            int dateColumnIndex = c.getColumnIndex(HabitEntry.COLUMN_DATE);
+            int starttimeColumnIndex = c.getColumnIndex(HabitEntry.COLUMN_START_TIME);
+            int finishtimeColumnIndex = c.getColumnIndex(HabitEntry.COLUMN_FINISH_TIME);
 
-            while (cursor.moveToNext()) {
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                int currentDate = cursor.getInt(dateColumnIndex);
-                int currentStartTime = cursor.getInt(starttimeColumnIndex);
-                int currentFinishTime = cursor.getInt(finishtimeColumnIndex);
+            while (c.moveToNext()) {
+                int currentID = c.getInt(idColumnIndex);
+                String currentName = c.getString(nameColumnIndex);
+                int currentDate = c.getInt(dateColumnIndex);
+                int currentStartTime = c.getInt(starttimeColumnIndex);
+                int currentFinishTime = c.getInt(finishtimeColumnIndex);
 
                 displayView.append(("\n" + currentID + " - " + currentName + " - " + currentDate + " - " + currentStartTime + " - " + currentFinishTime));
             }
 
         } finally {
 
-            cursor.close();
+            c.close();
         }
     }
 
